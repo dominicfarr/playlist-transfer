@@ -1,3 +1,5 @@
+import type { ReadSourcePlaylistError } from './read-source-playlist';
+
 export type UntransferableReason = 'not a song' | 'unavailable on Spotify';
 
 /** One entry in the Source Playlist. */
@@ -98,7 +100,11 @@ function parseJson(text: string): unknown {
   }
 }
 
-export type EmbedPageProblem = 'playlist not found' | 'source unreadable';
+/** The read errors an embed page itself can cause. */
+export type EmbedPageProblem = Exclude<
+  ReadSourcePlaylistError,
+  'not a playlist link'
+>;
 
 /** Extracts the Source Playlist from an embed page's `__NEXT_DATA__`. */
 export function parseEmbedPage(
