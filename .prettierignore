@@ -4,3 +4,4 @@ node_modules/
 package-lock.json
 domfarr.com.txt
 route53-*.json
+src/lib/transfer/fixtures/
