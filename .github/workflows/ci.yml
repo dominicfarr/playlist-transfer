@@ -120,9 +120,11 @@ jobs:
             aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
               --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text
           }
-          echo "bucket=$(output BucketName)" >> "$GITHUB_OUTPUT"
-          echo "distribution=$(output DistributionId)" >> "$GITHUB_OUTPUT"
-          echo "url=$(output SiteUrl)" >> "$GITHUB_OUTPUT"
+          {
+            echo "bucket=$(output BucketName)"
+            echo "distribution=$(output DistributionId)"
+            echo "url=$(output SiteUrl)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Sync the site to S3
         env:
