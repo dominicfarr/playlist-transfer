@@ -1,6 +1,10 @@
 import type { ReadSourcePlaylistError } from './read-source-playlist';
 
-export type UntransferableReason = 'not a song' | 'unavailable on Spotify';
+export type UntransferableReason =
+  | 'not a song'
+  | 'unavailable on Spotify'
+  /** The embed page lists the item, but not in a shape we can read. */
+  | 'unreadable from Spotify';
 
 /** One entry in the Source Playlist. */
 export interface SourceTrack {
@@ -78,22 +82,69 @@ function untransferableDetail(track: EmbedTrack): string | null {
 interface EmbedEntity {
   name: string;
   subtitle: string;
-  trackList: EmbedTrack[];
+  trackList: unknown[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function isEmbedTrack(value: unknown): value is EmbedTrack {
-  return (
-    isRecord(value) &&
-    typeof value.title === 'string' &&
-    typeof value.subtitle === 'string' &&
-    typeof value.duration === 'number' &&
-    typeof value.entityType === 'string' &&
-    typeof value.isPlayable === 'boolean'
-  );
+const EMBED_TRACK_FIELDS = {
+  title: 'string',
+  subtitle: 'string',
+  duration: 'number',
+  entityType: 'string',
+  isPlayable: 'boolean',
+} as const;
+
+/** The fields of a track list item that are missing or of the wrong type. */
+function badFields(item: Record<string, unknown>): string[] {
+  return Object.entries(EMBED_TRACK_FIELDS)
+    .filter(([field, type]) => typeof item[field] !== type)
+    .map(([field]) => field);
+}
+
+function isEmbedTrack(
+  item: Record<string, unknown>,
+): item is Record<string, unknown> & EmbedTrack {
+  return badFields(item).length === 0;
+}
+
+function stringOr(value: unknown, fallback: string): string {
+  return typeof value === 'string' ? value : fallback;
+}
+
+/** Turns one track list item into a Source Track, however odd the item. */
+function sourceTrack(item: unknown, index: number): SourceTrack {
+  const position = index + 1;
+  if (!isRecord(item)) {
+    return {
+      position,
+      title: '',
+      artists: '',
+      durationMs: 0,
+      untransferableReason: 'unreadable from Spotify',
+      untransferableDetail: 'not a track object',
+    };
+  }
+  if (!isEmbedTrack(item)) {
+    return {
+      position,
+      title: stringOr(item.title, ''),
+      artists: plainSpaces(stringOr(item.subtitle, '')),
+      durationMs: typeof item.duration === 'number' ? item.duration : 0,
+      untransferableReason: 'unreadable from Spotify',
+      untransferableDetail: `missing or invalid ${badFields(item).join(', ')}`,
+    };
+  }
+  return {
+    position,
+    title: item.title,
+    artists: plainSpaces(item.subtitle),
+    durationMs: item.duration,
+    untransferableReason: untransferableReason(item),
+    untransferableDetail: untransferableDetail(item),
+  };
 }
 
 function isEmbedEntity(value: unknown): value is EmbedEntity {
@@ -101,8 +152,7 @@ function isEmbedEntity(value: unknown): value is EmbedEntity {
     isRecord(value) &&
     typeof value.name === 'string' &&
     typeof value.subtitle === 'string' &&
-    Array.isArray(value.trackList) &&
-    value.trackList.every(isEmbedTrack)
+    Array.isArray(value.trackList)
   );
 }
 
@@ -144,14 +194,7 @@ export function parseEmbedPage(
     id,
     name: entity.name,
     owner: entity.subtitle,
-    sourceTracks: entity.trackList.map((track, index) => ({
-      position: index + 1,
-      title: track.title,
-      artists: plainSpaces(track.subtitle),
-      durationMs: track.duration,
-      untransferableReason: untransferableReason(track),
-      untransferableDetail: untransferableDetail(track),
-    })),
+    sourceTracks: entity.trackList.map(sourceTrack),
     possiblyTruncated: entity.trackList.length === EMBED_PAGE_LIMIT,
   };
 }

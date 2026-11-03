@@ -4,7 +4,7 @@ import {
   transferableTracks,
   type SpotifyEmbedPort,
 } from './index';
-import { embedServing } from './fixtures/embed-fixtures';
+import { embedServing, embedServingHtml } from './fixtures/embed-fixtures';
 
 const EXAMPLE_SHARE_LINK =
   'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123';
@@ -68,6 +68,64 @@ describe('reading a Source Playlist from a Share Link', () => {
       untransferableDetail: 'UNAVAILABLE',
     });
     expect(transferableTracks(sourceRead.sourcePlaylist)).toHaveLength(14);
+  });
+
+  it('marks a Source Track it cannot read as an Untransferable Track, keeping the rest', async () => {
+    const sourceRead = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('with-malformed-track.html'),
+    );
+
+    if (!sourceRead.ok) throw new Error(`expected ok, got ${sourceRead.error}`);
+    const tracks = sourceRead.sourcePlaylist.sourceTracks;
+    expect(tracks).toHaveLength(15);
+    // The fixture's third track has no duration.
+    expect(tracks[2]).toMatchObject({
+      position: 3,
+      title: 'Waterline',
+      artists: 'Four80East',
+      untransferableReason: 'unreadable from Spotify',
+      untransferableDetail: 'missing or invalid duration',
+    });
+    expect(tracks[3]).toMatchObject({
+      position: 4,
+      title: 'Patience - Cool Wave Mix',
+      untransferableReason: null,
+    });
+    expect(transferableTracks(sourceRead.sourcePlaylist)).toHaveLength(14);
+  });
+
+  it('marks a track list item that is not an object as an Untransferable Track', async () => {
+    const nextData = {
+      props: {
+        pageProps: {
+          state: {
+            data: {
+              entity: { name: 'Odd', subtitle: 'someone', trackList: [null] },
+            },
+          },
+        },
+      },
+    };
+
+    const sourceRead = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServingHtml(
+        `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify(nextData)}</script>`,
+      ),
+    );
+
+    if (!sourceRead.ok) throw new Error(`expected ok, got ${sourceRead.error}`);
+    expect(sourceRead.sourcePlaylist.sourceTracks).toEqual([
+      {
+        position: 1,
+        title: '',
+        artists: '',
+        durationMs: 0,
+        untransferableReason: 'unreadable from Spotify',
+        untransferableDetail: 'not a track object',
+      },
+    ]);
   });
 
   it('counts every Source Track of the example playlist as transferable', async () => {

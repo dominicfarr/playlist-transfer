@@ -37,6 +37,15 @@ export async function checkLiveSourcePlaylist(
       message: `Read "${name}" from ${shareLink} but it has no Source Tracks; the embed page may have changed (see ADR 0001)`,
     };
   }
+  const unreadable = sourceTracks
+    .filter((track) => track.untransferableReason === 'unreadable from Spotify')
+    .map((track) => `${track.position} (${track.untransferableDetail})`);
+  if (unreadable.length > 0) {
+    return {
+      passed: false,
+      message: `Read "${name}" from ${shareLink} but Source Tracks ${unreadable.join(', ')} could not be read; the embed page may have changed (see ADR 0001)`,
+    };
+  }
   const badlyShaped = sourceTracks
     .filter(
       (track) =>

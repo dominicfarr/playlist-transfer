@@ -115,4 +115,25 @@ describe('the live Source Playlist check', () => {
         'Read "Odd" from https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51 but Source Tracks 2, 4, 5 lack a title, artists or duration; the embed page may have changed (see ADR 0001)',
     });
   });
+
+  it('fails, naming their positions, when Source Tracks are unreadable from Spotify', async () => {
+    const withoutIsPlayable: Record<string, unknown> = { ...goodTrack };
+    delete withoutIsPlayable.isPlayable;
+    const check = await checkLiveSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServingHtml(
+        embedPageWith({
+          name: 'Odd',
+          subtitle: 'someone',
+          trackList: [goodTrack, withoutIsPlayable, goodTrack],
+        }),
+      ),
+    );
+
+    expect(check).toEqual({
+      passed: false,
+      message:
+        'Read "Odd" from https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51 but Source Tracks 2 (missing or invalid isPlayable) could not be read; the embed page may have changed (see ADR 0001)',
+    });
+  });
 });
