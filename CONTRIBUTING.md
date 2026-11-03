@@ -8,6 +8,7 @@ These rules apply to humans and agents alike. Use the terms in [GLOSSARY.md](GLO
 - **One-time setup:** follow [Development setup](README.md#development-setup) in the README. `npm run hooks:install` installs the `pre-commit` and `commit-msg` hooks. Keep shellcheck on your PATH: actionlint only checks workflow shell scripts when it is there, and CI always has it. Non-npm tools (gitleaks, actionlint, cfn-lint) are pinned in `.pre-commit-config.yaml`, and pre-commit downloads them on first use.
 - **Every commit must pass the pre-commit hook.** If a hook fails or changes files, fix the problem, `git add -u`, and commit again. Never use `--no-verify`. CI runs the same checks and will fail anyway.
 - **Only the pipeline deploys.** Don't deploy from a laptop.
+- **The SonarQube Cloud quality gate is a separate signal from CI.** The Sonar workflow analyses every push to `main` and reports to its own badge, so a gate failure never shows as failing tests or blocks a deploy. Treat a red gate like a red build anyway: fix real issues, and record a reviewed false positive as a scoped ignore in `sonar-project.properties` with a comment explaining why. Pin every GitHub Action to a commit SHA, with the version as a comment (Sonar S7637).
 
 ## Commit messages
 
