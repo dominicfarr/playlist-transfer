@@ -1,0 +1,37 @@
+# Playlist Transfer
+
+Copy a public Spotify playlist into your Apple Music library. You only need to paste the playlist's share link. You don't need a Spotify account.
+
+> **Status:** design complete, implementation not started. The Spotify side has been proven in a throwaway spike, and the Apple Music side has not been built yet.
+
+## How it works
+
+1. Paste a Spotify playlist share link (`https://open.spotify.com/playlist/...`).
+2. The app reads the playlist's tracks and searches Apple Music for each one. It matches on title, artist and duration.
+3. In **Review**, each Spotify track is shown next to its Apple Music match. Uncertain matches are flagged, and you can untick tracks or pick a different candidate.
+4. Sign in with your Apple ID (an Apple Music subscription is required) and save. A new playlist appears in your library.
+
+Each run is a one-off copy and nothing is kept in sync. The app stores nothing: it is a static site, and your Apple Music sign-in stays in your browser.
+
+## Limitations
+
+- Only **public** Spotify playlists work, and only the **first 100 tracks** are read.
+- Matching is a best guess, because Spotify's public pages don't expose ISRCs (the standard recording IDs). Expect the occasional wrong version, such as a live recording or a remaster.
+- The track list is read from Spotify's public embed page, not the Spotify Web API, which no longer serves other people's playlists to apps like this one. This is against Spotify's terms of use, so the project is a personal tool and not a public service. See [ADR 0001](docs/adr/0001-read-spotify-embed-page-via-cloudfront.md).
+- The Apple Music API can't edit or delete playlists, so a saved playlist can only be changed in the Music app.
+
+## Stack
+
+- Svelte 5, Vite and TypeScript, built as a static single-page app
+- MusicKit JS v3 for Apple sign-in, catalog search and saving playlists
+- AWS: S3 and CloudFront at `playlist.domfarr.com`. CloudFront also proxies Spotify's embed page so the browser can read it. DNS is in Route 53, and the infrastructure is a CloudFormation stack ([ADR 0002](docs/adr/0002-route53-dns-and-cloudformation-per-subdomain.md)).
+- GitHub Actions for continuous delivery from `main`, signing in to AWS through OIDC
+
+## Docs
+
+| File | What it covers |
+|---|---|
+| [PLAN.md](PLAN.md) | The full design: behaviour, stack, delivery and infrastructure |
+| [GLOSSARY.md](GLOSSARY.md) | Domain terms such as Source Playlist, Match, Match Confidence and Review. Use these words in code, commits and issues |
+| [docs/adr/](docs/adr/) | Architecture decisions and why they were made |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Workflow, pre-commit hooks and the commit message format (Conventional Commits) |

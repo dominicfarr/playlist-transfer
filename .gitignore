@@ -10,44 +10,39 @@
 .DocumentRevisions-V100
 Icon?
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-build/
+# Dependencies (package-lock.json IS committed)
+node_modules/
+
+# Build output
 dist/
-*.egg-info/
-.eggs/
-pip-wheel-metadata/
+dist-ssr/
+*.local
+*.tsbuildinfo
+.vite/
 
-# Virtual environments
-.venv/
-venv/
-env/
+# Testing / type checking / linting caches
+coverage/
+.vitest/
+.eslintcache
+.prettiercache
+.stylelintcache
 
-# Testing / type checking / linting
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-.mypy_cache/
-.ruff_cache/
-.pyright/
+# AWS / CloudFormation build artefacts (SAM if we ever add the Lambda fallback)
+.aws-sam/
+packaged*.yaml
+samconfig.local.toml
 
-# Jupyter
-.ipynb_checkpoints/
-
-# Environment / secrets
+# Secrets: never commit. Apple MusicKit private key, certificates, env files
+*.p8
+*.pem
+*.key
 .env
 .env.*
 !.env.example
 
-# Flask
-instance/
-.webassets-cache
+# DNS migration working files (contain zone data; kept out of the public repo)
+domfarr.com.txt
+route53-*.json
 
 # Editors
 .vscode/
@@ -57,3 +52,4 @@ instance/
 
 # Logs
 *.log
+npm-debug.log*
