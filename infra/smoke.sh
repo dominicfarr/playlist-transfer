@@ -27,7 +27,9 @@ check() {
     fi
     sleep "$DELAY"
   done
-  echo "FAIL $name: wanted $want${text:+ containing '$text'}, last got $got"
+  local wanted="$want"
+  if [[ -n "$text" ]]; then wanted+=" containing '$text'"; fi
+  echo "FAIL $name: wanted $wanted, last got $got"
   failures=$((failures + 1))
 }
 
