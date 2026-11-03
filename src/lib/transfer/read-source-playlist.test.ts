@@ -138,6 +138,65 @@ describe('reading a Source Playlist from a Share Link', () => {
     expect(result.sourcePlaylist.possiblyTruncated).toBe(false);
   });
 
+  it('reports playlist not found for the page Spotify serves for an unknown id', async () => {
+    const result = await readSourcePlaylist(
+      'https://open.spotify.com/playlist/0000000000000000000000',
+      embedServing('playlist-not-found.html'),
+    );
+
+    expect(result).toEqual({ ok: false, error: 'playlist not found' });
+  });
+
+  it('reports playlist not found when the embed port finds no page', async () => {
+    const embed: SpotifyEmbedPort = {
+      fetchEmbedPage: async () => ({ found: false }),
+    };
+
+    const result = await readSourcePlaylist(EXAMPLE_SHARE_LINK, embed);
+
+    expect(result).toEqual({ ok: false, error: 'playlist not found' });
+  });
+
+  it('reports source unreadable when the page has no __NEXT_DATA__', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('missing-next-data.html'),
+    );
+
+    expect(result).toEqual({ ok: false, error: 'source unreadable' });
+  });
+
+  it.each([
+    [
+      'broken JSON',
+      '<script id="__NEXT_DATA__" type="application/json">{</script>',
+    ],
+    [
+      'an unexpected shape',
+      '<script id="__NEXT_DATA__" type="application/json">{"props":{}}</script>',
+    ],
+  ])('reports source unreadable for %s in __NEXT_DATA__', async (_, html) => {
+    const embed: SpotifyEmbedPort = {
+      fetchEmbedPage: async () => ({ found: true, html }),
+    };
+
+    const result = await readSourcePlaylist(EXAMPLE_SHARE_LINK, embed);
+
+    expect(result).toEqual({ ok: false, error: 'source unreadable' });
+  });
+
+  it('reports source unreadable when the embed port fails', async () => {
+    const embed: SpotifyEmbedPort = {
+      fetchEmbedPage: async () => {
+        throw new Error('network down');
+      },
+    };
+
+    const result = await readSourcePlaylist(EXAMPLE_SHARE_LINK, embed);
+
+    expect(result).toEqual({ ok: false, error: 'source unreadable' });
+  });
+
   it.each([
     'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51',
     'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123&pt=x',

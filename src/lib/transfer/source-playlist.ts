@@ -65,12 +65,61 @@ interface EmbedEntity {
   trackList: EmbedTrack[];
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isEmbedTrack(value: unknown): value is EmbedTrack {
+  return (
+    isRecord(value) &&
+    typeof value.title === 'string' &&
+    typeof value.subtitle === 'string' &&
+    typeof value.duration === 'number' &&
+    typeof value.entityType === 'string' &&
+    typeof value.isPlayable === 'boolean'
+  );
+}
+
+function isEmbedEntity(value: unknown): value is EmbedEntity {
+  return (
+    isRecord(value) &&
+    typeof value.name === 'string' &&
+    typeof value.subtitle === 'string' &&
+    Array.isArray(value.trackList) &&
+    value.trackList.every(isEmbedTrack)
+  );
+}
+
+function parseJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
+export type EmbedPageProblem = 'playlist not found' | 'source unreadable';
+
 /** Extracts the Source Playlist from an embed page's `__NEXT_DATA__`. */
-export function parseEmbedPage(id: string, html: string): SourcePlaylist {
+export function parseEmbedPage(
+  id: string,
+  html: string,
+): SourcePlaylist | EmbedPageProblem {
   const json = NEXT_DATA.exec(html)?.[1];
-  if (json === undefined) throw new Error('no __NEXT_DATA__');
-  const entity = JSON.parse(json).props.pageProps.state.data
-    .entity as EmbedEntity;
+  if (json === undefined) return 'source unreadable';
+  const nextData = parseJson(json);
+  const pageProps =
+    isRecord(nextData) && isRecord(nextData.props)
+      ? nextData.props.pageProps
+      : undefined;
+  if (!isRecord(pageProps)) return 'source unreadable';
+  // For an unknown id Spotify still answers 200, with a 404 status inside.
+  if (pageProps.status === 404) return 'playlist not found';
+
+  const state = pageProps.state;
+  const data = isRecord(state) ? state.data : undefined;
+  const entity = isRecord(data) ? data.entity : undefined;
+  if (!isEmbedEntity(entity)) return 'source unreadable';
   return {
     id,
     name: entity.name,

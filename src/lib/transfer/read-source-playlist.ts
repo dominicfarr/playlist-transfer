@@ -1,6 +1,6 @@
 import { parseShareLink } from './share-link';
 import { parseEmbedPage, type SourcePlaylist } from './source-playlist';
-import type { SpotifyEmbedPort } from './spotify-embed-port';
+import type { EmbedPage, SpotifyEmbedPort } from './spotify-embed-port';
 
 export type ReadSourcePlaylistError =
   'not a playlist link' | 'playlist not found' | 'source unreadable';
@@ -16,7 +16,16 @@ export async function readSourcePlaylist(
 ): Promise<ReadSourcePlaylistResult> {
   const playlistId = parseShareLink(shareLink);
   if (playlistId === null) return { ok: false, error: 'not a playlist link' };
-  const page = await embed.fetchEmbedPage(playlistId);
+
+  let page: EmbedPage;
+  try {
+    page = await embed.fetchEmbedPage(playlistId);
+  } catch {
+    return { ok: false, error: 'source unreadable' };
+  }
   if (!page.found) return { ok: false, error: 'playlist not found' };
-  return { ok: true, sourcePlaylist: parseEmbedPage(playlistId, page.html) };
+
+  const parsed = parseEmbedPage(playlistId, page.html);
+  if (typeof parsed === 'string') return { ok: false, error: parsed };
+  return { ok: true, sourcePlaylist: parsed };
 }
