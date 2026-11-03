@@ -2,6 +2,8 @@
   --bg: #ffffff;
   --fg: #1a1a1a;
   --muted: #6b6b6b;
+  --error: #b00020;
+  --warning: #8a5a00;
 
   color-scheme: light dark;
   font-family:
@@ -17,6 +19,8 @@
     --bg: #121212;
     --fg: #f0f0f0;
     --muted: #a0a0a0;
+    --error: #ff8a80;
+    --warning: #ffc966;
   }
 }
 
