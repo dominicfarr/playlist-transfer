@@ -1,0 +1,42 @@
+name: Live Source Playlist check
+
+# Early warning that Spotify has changed its embed page (ADR 0001). Reads the
+# example playlist from live Spotify through the Transfer core and the real
+# Spotify embed port. A failed run sends GitHub's usual failed-workflow
+# notification to the developer.
+on:
+  schedule:
+    - cron: '17 6 * * *' # daily, 06:17 UTC
+  workflow_dispatch:
+    inputs:
+      share_link:
+        description: Share Link to check (blank for the example playlist)
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-source-check
+  cancel-in-progress: false
+
+jobs:
+  live-source-check:
+    name: Read the live Source Playlist
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - run: npm ci
+
+      - name: Live Source Playlist check
+        env:
+          LIVE_CHECK_SHARE_LINK: ${{ inputs.share_link }}
+        run: npm run check:live
