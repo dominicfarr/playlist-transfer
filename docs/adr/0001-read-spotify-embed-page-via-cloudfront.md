@@ -20,4 +20,4 @@ Since February/March 2026, Spotify's Web API returns no tracks for playlists the
 - This is against Spotify's terms, which prohibit scraping. We accept that for a personal / close-friends tool (V1/V2). It is a real blocker for any public V3.
 - No ISRC is available, so every Match comes from search and has a Match Confidence.
 - The embed page returns at most 100 tracks and gives no total count, so exactly 100 Source Tracks is treated as possibly truncated.
-- The page structure can change without notice. A scheduled CI job fetches the live page and fails when parsing breaks.
+- The page structure can change without notice. A manually triggered live check fetches the live page and fails when parsing breaks.

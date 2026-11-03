@@ -46,6 +46,16 @@ npm run dev
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and the commit message format.
 
+## Live Source Playlist check
+
+This check reads a real Source Playlist from live Spotify. It only runs when you start it:
+
+- **In GitHub:** go to Actions → _Live Source Playlist check_ → _Run workflow_. You can give it a Share Link, or leave that blank to use the example playlist.
+- **From the CLI:** `gh workflow run live-source-check.yml --ref main`
+- **Locally:** `npm run check:live`. Set `LIVE_CHECK_SHARE_LINK` to check a different Share Link.
+
+If it fails, Spotify has probably changed or blocked its embed page, and reading Source Playlists will break until the parser catches up. See [ADR 0001](docs/adr/0001-read-spotify-embed-page-via-cloudfront.md).
+
 ## Docs
 
 | File                               | What it covers                                                                                                        |

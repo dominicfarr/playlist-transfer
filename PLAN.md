@@ -74,7 +74,7 @@ It is a one-shot **Transfer**: re-running creates another playlist, and nothing 
 
 - **Tests**:
   - Unit tests: embed parsing (against a saved copy of the real page), query building, Match Confidence.
-  - A daily scheduled job checks the live embed page still parses.
+  - A manually triggered live check confirms the live embed page still parses.
   - The Apple flow is tested by hand for V1.
 
 ## Infrastructure (ADR 0002)
