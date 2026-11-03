@@ -128,6 +128,32 @@ describe('reading a Source Playlist from a Share Link', () => {
     ]);
   });
 
+  it('keeps a repeated track as two Source Tracks, in order', async () => {
+    const sourceRead = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('with-duplicate-track.html'),
+    );
+
+    if (!sourceRead.ok) throw new Error(`expected ok, got ${sourceRead.error}`);
+    const tracks = sourceRead.sourcePlaylist.sourceTracks;
+    expect(tracks).toHaveLength(16);
+    // The fixture repeats the second track as the sixth.
+    const tba1 = {
+      title: 'TBA1',
+      artists: 'Crandon Park',
+      durationMs: 195447,
+      untransferableReason: null,
+    };
+    expect(tracks[1]).toMatchObject({ position: 2, ...tba1 });
+    expect(tracks[5]).toMatchObject({ position: 6, ...tba1 });
+    expect(tracks.map((t) => t.title).slice(4, 7)).toEqual([
+      'Late Night Drive',
+      'TBA1',
+      'High And Dry - Live On The South Bank Show / 2014',
+    ]);
+    expect(transferableTracks(sourceRead.sourcePlaylist)).toHaveLength(16);
+  });
+
   it('counts every Source Track of the example playlist as transferable', async () => {
     const sourceRead = await readSourcePlaylist(
       EXAMPLE_SHARE_LINK,
