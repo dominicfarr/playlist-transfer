@@ -3,7 +3,7 @@ import { checkLiveSourcePlaylist } from './live-source-check';
 import { createSpotifyEmbedFetch } from './spotify-embed-fetch';
 
 /**
- * The daily live Source Playlist check (`npm run check:live`). It reads a
+ * The manually triggered live Source Playlist check (`npm run check:live`). It reads a
  * real playlist from live Spotify through the same seam as the unit tests,
  * with the real Spotify embed port. There is no proxy here, so the port
  * goes straight to open.spotify.com.
