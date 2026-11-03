@@ -5,7 +5,8 @@ These rules apply to humans and agents alike. Use the terms in [GLOSSARY.md](GLO
 ## Workflow
 
 - **Trunk-based.** Commit small, working changes directly to `main`. No long-lived branches.
-- **Every commit must pass the pre-commit hook.** Install it once with `pre-commit install --install-hooks`. If a hook fails or changes files, fix the problem, `git add -u`, and commit again. Never use `--no-verify`. CI runs the same checks and will fail anyway.
+- **One-time setup:** Node 22+, then `npm ci`. Install pre-commit (`uv tool install pre-commit`), then run `npm run hooks:install`, which installs the `pre-commit` and `commit-msg` hooks. Non-npm tools (gitleaks, actionlint, cfn-lint) are pinned in `.pre-commit-config.yaml`, and pre-commit downloads them on first use.
+- **Every commit must pass the pre-commit hook.** If a hook fails or changes files, fix the problem, `git add -u`, and commit again. Never use `--no-verify`. CI runs the same checks and will fail anyway.
 - **Only the pipeline deploys.** Don't deploy from a laptop.
 
 ## Commit messages
@@ -21,38 +22,41 @@ We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1
 ```
 
 - **description**: imperative mood, lower case, no full stop, 72 characters or fewer for the whole first line. Examples: "add", "fix", "remove". Not "added" or "adds".
-- **body**: optional. Explain *why* the change was made, not what changed; the diff shows what. Wrap at 72 characters and leave a blank line after the first line.
+- **body**: optional. Explain _why_ the change was made, not what changed; the diff shows what. Wrap at 72 characters and leave a blank line after the first line.
 - **footers**: `BREAKING CHANGE: <what breaks and how to migrate>`, `Refs: #<issue>`, `Co-Authored-By: <name> <email>`.
-- **Breaking changes**: put `!` after the type or scope (`feat(review)!: ...`) *and* add a `BREAKING CHANGE:` footer.
+- **Breaking changes**: put `!` after the type or scope (`feat(review)!: ...`) _and_ add a `BREAKING CHANGE:` footer.
 - **One logical change per commit.** If the description needs "and", split the commit.
 
 ### Types
 
-| Type | Use for |
-|---|---|
-| `feat` | A new capability the person using the app can see |
-| `fix` | A bug fix the person using the app can see |
-| `refactor` | A code change with no change in behaviour |
-| `perf` | A performance improvement |
-| `test` | Adding or changing tests only |
-| `docs` | Docs only: README, GLOSSARY, ADRs, this file |
-| `build` | Build tooling, dependencies, Vite and TypeScript config |
-| `ci` | GitHub Actions workflows, the pre-commit config |
-| `chore` | Anything else that doesn't touch `src/` or tests |
-| `revert` | Reverting an earlier commit. The body should say `Reverts <sha>` |
+| Type       | Use for                                                          |
+| ---------- | ---------------------------------------------------------------- |
+| `feat`     | A new capability the person using the app can see                |
+| `fix`      | A bug fix the person using the app can see                       |
+| `refactor` | A code change with no change in behaviour                        |
+| `perf`     | A performance improvement                                        |
+| `test`     | Adding or changing tests only                                    |
+| `docs`     | Docs only: README, GLOSSARY, ADRs, this file                     |
+| `build`    | Build tooling, dependencies, Vite and TypeScript config          |
+| `ci`       | GitHub Actions workflows, the pre-commit config                  |
+| `chore`    | Anything else that doesn't touch `src/` or tests                 |
+| `revert`   | Reverting an earlier commit. The body should say `Reverts <sha>` |
 
 ### Scopes
 
 The scope is optional but encouraged. Use a domain term from the glossary where one fits:
 
-| Scope | Covers |
-|---|---|
-| `source` | Reading the Source Playlist from the Spotify embed page |
-| `matching` | Searching the Storefront, Matches and Match Confidence |
-| `review` | The Review screen |
-| `apple` | MusicKit sign-in, the developer token, saving the Destination Playlist |
-| `infra` | CloudFormation, CloudFront, S3, Route 53 |
-| `deps` | Dependency bumps (with `build`) |
+| Scope      | Covers                                                                 |
+| ---------- | ---------------------------------------------------------------------- |
+| `source`   | Reading the Source Playlist from the Spotify embed page                |
+| `matching` | Searching the Storefront, Matches and Match Confidence                 |
+| `review`   | The Review screen                                                      |
+| `apple`    | MusicKit sign-in, the developer token, saving the Destination Playlist |
+| `infra`    | CloudFormation, CloudFront, S3, Route 53                               |
+| `deps`     | Dependency bumps (with `build`)                                        |
+| `adr`      | Architecture decision records (with `docs`)                            |
+
+The allowed types and scopes are enforced by commitlint (`commitlint.config.js`). Change both files together.
 
 ### Examples
 

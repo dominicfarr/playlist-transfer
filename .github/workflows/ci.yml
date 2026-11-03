@@ -1,0 +1,76 @@
+name: CI
+
+# Runs on every push. Trunk is `main`; other branches are only for throwaway
+# experiments. Deploy stages are added in ticket #4 and run on `main` only.
+on:
+  push:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    name: Checks, tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # commitlint needs the pushed range
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - run: npm ci
+
+      - uses: astral-sh/setup-uv@v7
+
+      - name: Install pre-commit
+        run: uv tool install pre-commit
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: All pre-commit hooks on every file
+        run: pre-commit run --all-files --show-diff-on-failure
+
+      - name: Lint commit messages in this push
+        env:
+          BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            # Normal push: every commit the push added.
+            npx --no-install commitlint --from "$BEFORE" --to "$HEAD_SHA" --verbose
+          elif [ "$REF_NAME" != "main" ] && git rev-parse -q --verify origin/main >/dev/null; then
+            # New branch: every commit not already on main.
+            npx --no-install commitlint --from "$(git merge-base origin/main "$HEAD_SHA")" --to "$HEAD_SHA" --verbose
+          else
+            # First push of main (or history rewritten): no range to compare, lint the head commit.
+            npx --no-install commitlint --last --verbose
+          fi
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Keep the build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14

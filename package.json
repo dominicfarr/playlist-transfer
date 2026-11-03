@@ -1,0 +1,42 @@
+{
+  "name": "playlist-transfer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Copy a public Spotify playlist into an Apple Music library playlist.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json --fail-on-warnings && tsc -p tsconfig.node.json",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "hooks:install": "pre-commit install --install-hooks"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@eslint/js": "^10.0.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@tsconfig/svelte": "^5.0.8",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.24.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-svelte": "^4.1.1",
+    "svelte": "^5.57.3",
+    "svelte-check": "^4.7.8",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0"
+  }
+}

@@ -60,7 +60,7 @@ It is a one-shot **Transfer**: re-running creates another playlist, and nothing 
   - GitHub Actions runs on every push, and the checks gate the deploy.
   - Only the pipeline deploys, one immutable artifact per release.
   - Public repo: `dominicfarr/playlist-transfer`.
-- **Pre-commit hook** (pre-commit framework, local hooks, versions from `package-lock.json`):
+- **Pre-commit hook** (pre-commit framework; npm tools run as local hooks with versions from `package-lock.json`, and the non-npm tools gitleaks, actionlint and cfn-lint are pinned by `rev` in `.pre-commit-config.yaml`):
   - ESLint `--fix`
   - Prettier
   - `svelte-check`
