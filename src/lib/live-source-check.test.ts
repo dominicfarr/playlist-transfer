@@ -1,29 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { checkLiveSourcePlaylist } from './live-source-check';
-import type { EmbedPage, SpotifyEmbedPort } from './transfer';
+import {
+  embedServing,
+  embedServingHtml,
+} from './transfer/fixtures/embed-fixtures';
 
 const EXAMPLE_SHARE_LINK =
   'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51';
-
-const fixtures = import.meta.glob<string>('./transfer/fixtures/*.html', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
-
-function fixture(name: string): string {
-  const html = fixtures[`./transfer/fixtures/${name}`];
-  if (html === undefined) throw new Error(`no fixture ${name}`);
-  return html;
-}
-
-function embedAnswering(page: EmbedPage): SpotifyEmbedPort {
-  return { fetchEmbedPage: async () => page };
-}
-
-function embedServing(html: string): SpotifyEmbedPort {
-  return embedAnswering({ found: true, html });
-}
 
 /** An embed page whose `__NEXT_DATA__` holds the given entity. */
 function embedPageWith(entity: unknown): string {
@@ -43,7 +26,7 @@ describe('the live Source Playlist check', () => {
   it('passes for a non-empty, well-shaped Source Playlist', async () => {
     const check = await checkLiveSourcePlaylist(
       EXAMPLE_SHARE_LINK,
-      embedServing(fixture('sailing-into-yesterday.html')),
+      embedServing('sailing-into-yesterday.html'),
     );
 
     expect(check).toEqual({
@@ -56,7 +39,7 @@ describe('the live Source Playlist check', () => {
   it('fails when the embed page has no readable __NEXT_DATA__', async () => {
     const check = await checkLiveSourcePlaylist(
       EXAMPLE_SHARE_LINK,
-      embedServing(fixture('missing-next-data.html')),
+      embedServing('missing-next-data.html'),
     );
 
     expect(check).toEqual({
@@ -83,7 +66,7 @@ describe('the live Source Playlist check', () => {
   it('fails when Spotify says the playlist does not exist', async () => {
     const check = await checkLiveSourcePlaylist(
       'https://open.spotify.com/playlist/0000000000000000000000',
-      embedServing(fixture('playlist-not-found.html')),
+      embedServing('playlist-not-found.html'),
     );
 
     expect(check).toEqual({
@@ -96,7 +79,7 @@ describe('the live Source Playlist check', () => {
   it('fails when the Source Playlist has no Source Tracks', async () => {
     const check = await checkLiveSourcePlaylist(
       EXAMPLE_SHARE_LINK,
-      embedServing(
+      embedServingHtml(
         embedPageWith({ name: 'Empty', subtitle: 'someone', trackList: [] }),
       ),
     );
@@ -111,7 +94,7 @@ describe('the live Source Playlist check', () => {
   it('fails, naming their positions, when Source Tracks lack a title, artists or duration', async () => {
     const check = await checkLiveSourcePlaylist(
       EXAMPLE_SHARE_LINK,
-      embedServing(
+      embedServingHtml(
         embedPageWith({
           name: 'Odd',
           subtitle: 'someone',

@@ -4,36 +4,10 @@ import {
   transferableTracks,
   type SpotifyEmbedPort,
 } from './index';
+import { embedServing } from './fixtures/embed-fixtures';
 
 const EXAMPLE_SHARE_LINK =
   'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123';
-
-// Saved copies of real embed pages (tokens redacted), plus hand-edited variants.
-const fixtures = import.meta.glob<string>('./fixtures/*.html', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
-
-function fixture(name: string): string {
-  const html = fixtures[`./fixtures/${name}`];
-  if (html === undefined) throw new Error(`no fixture ${name}`);
-  return html;
-}
-
-/** A Spotify embed port that serves one saved embed page for any playlist id. */
-function embedServing(fixtureName: string): SpotifyEmbedPort & {
-  requestedIds: string[];
-} {
-  const requestedIds: string[] = [];
-  return {
-    requestedIds,
-    async fetchEmbedPage(playlistId) {
-      requestedIds.push(playlistId);
-      return { found: true, html: fixture(fixtureName) };
-    },
-  };
-}
 
 describe('reading a Source Playlist from a Share Link', () => {
   it('reads the example playlist name, owner and Source Tracks in order', async () => {
