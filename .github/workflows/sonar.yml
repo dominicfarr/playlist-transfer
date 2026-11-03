@@ -1,0 +1,45 @@
+name: Sonar
+
+# Its own workflow, so CI reports the checks and tests, and the quality gate
+# badge reports this analysis: a quality gate failure never shows as failing
+# tests. Trunk-based, so it runs on pushes to main only.
+on:
+  push:
+    branches: [main]
+
+# Least privilege: the workflow only needs to read the repository
+permissions:
+  contents: read
+
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    name: SonarQube Cloud analysis
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to commit SHAs so a moved tag can't change what runs (Sonar S7637),
+      # on the same versions as the CI workflow; Dependabot bumps them together.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          # SonarQube Cloud needs the full history to tell new code from old
+          fetch-depth: 0
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      # Lockfile install with no dependency install scripts (Sonar S8544); none are needed
+      - run: npm ci --ignore-scripts
+
+      - name: Test under coverage
+        run: npm run test:coverage
+
+      - name: SonarQube Cloud
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
