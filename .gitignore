@@ -44,7 +44,8 @@ samconfig.local.toml
 domfarr.com.txt
 route53-*.json
 
-# Editors
+# Editors and agents (Claude Code keeps its agent worktrees in .claude/)
+.claude/
 .vscode/
 .idea/
 *.swp
