@@ -12,6 +12,12 @@ export interface SourceTrack {
   durationMs: number;
   /** Why this is an Untransferable Track, or null if it can be transferred. */
   untransferableReason: UntransferableReason | null;
+  /**
+   * More about why it is an Untransferable Track, e.g. Spotify's
+   * `playabilityReason` ("UNAVAILABLE") for one unavailable on Spotify.
+   * Null when there is nothing more to say.
+   */
+  untransferableDetail: string | null;
 }
 
 export interface SourcePlaylist {
@@ -46,6 +52,7 @@ interface EmbedTrack {
   duration: number;
   entityType: string;
   isPlayable: boolean;
+  playabilityReason?: unknown;
 }
 
 const NO_BREAK_SPACE = String.fromCharCode(0xa0);
@@ -59,6 +66,13 @@ function untransferableReason(track: EmbedTrack): UntransferableReason | null {
   if (track.entityType !== 'track') return 'not a song';
   if (!track.isPlayable) return 'unavailable on Spotify';
   return null;
+}
+
+function untransferableDetail(track: EmbedTrack): string | null {
+  if (untransferableReason(track) !== 'unavailable on Spotify') return null;
+  return typeof track.playabilityReason === 'string'
+    ? track.playabilityReason
+    : null;
 }
 
 interface EmbedEntity {
@@ -136,6 +150,7 @@ export function parseEmbedPage(
       artists: plainSpaces(track.subtitle),
       durationMs: track.duration,
       untransferableReason: untransferableReason(track),
+      untransferableDetail: untransferableDetail(track),
     })),
     possiblyTruncated: entity.trackList.length === EMBED_PAGE_LIMIT,
   };

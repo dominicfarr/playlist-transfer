@@ -94,7 +94,8 @@
             >
             {#if sourceTrack.untransferableReason}
               <span class="reason"
-                >Untransferable Track: {sourceTrack.untransferableReason}</span
+                >Untransferable Track: {sourceTrack.untransferableReason}{#if sourceTrack.untransferableDetail}
+                  ({sourceTrack.untransferableDetail}){/if}</span
               >
             {/if}
           </li>

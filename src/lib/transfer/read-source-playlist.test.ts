@@ -27,6 +27,7 @@ describe('reading a Source Playlist from a Share Link', () => {
       artists: 'Ray Sterling',
       durationMs: 227799,
       untransferableReason: null,
+      untransferableDetail: null,
     });
     expect(playlist.sourceTracks.map((t) => t.title).slice(-2)).toEqual([
       'Many Men - Jazz Version',
@@ -53,7 +54,7 @@ describe('reading a Source Playlist from a Share Link', () => {
     );
   });
 
-  it('marks an unplayable track as an Untransferable Track that is unavailable on Spotify', async () => {
+  it("marks an unplayable track as an Untransferable Track that is unavailable on Spotify, with Spotify's playabilityReason", async () => {
     const sourceRead = await readSourcePlaylist(
       EXAMPLE_SHARE_LINK,
       embedServing('with-unplayable-track.html'),
@@ -64,6 +65,7 @@ describe('reading a Source Playlist from a Share Link', () => {
       position: 5,
       title: 'Late Night Drive',
       untransferableReason: 'unavailable on Spotify',
+      untransferableDetail: 'UNAVAILABLE',
     });
     expect(transferableTracks(sourceRead.sourcePlaylist)).toHaveLength(14);
   });
