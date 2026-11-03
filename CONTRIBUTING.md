@@ -5,7 +5,7 @@ These rules apply to humans and agents alike. Use the terms in [GLOSSARY.md](GLO
 ## Workflow
 
 - **Trunk-based.** Commit small, working changes directly to `main`. No long-lived branches.
-- **One-time setup:** Node 22+, then `npm ci`. Install pre-commit (`uv tool install pre-commit`), then run `npm run hooks:install`, which installs the `pre-commit` and `commit-msg` hooks. Non-npm tools (gitleaks, actionlint, cfn-lint) are pinned in `.pre-commit-config.yaml`, and pre-commit downloads them on first use.
+- **One-time setup:** Node 22+, then `npm ci`. Install pre-commit and shellcheck (`uv tool install pre-commit` and `uv tool install shellcheck-py`; actionlint only checks workflow shell scripts when shellcheck is on your PATH, and CI always has it), then run `npm run hooks:install`, which installs the `pre-commit` and `commit-msg` hooks. Non-npm tools (gitleaks, actionlint, cfn-lint) are pinned in `.pre-commit-config.yaml`, and pre-commit downloads them on first use.
 - **Every commit must pass the pre-commit hook.** If a hook fails or changes files, fix the problem, `git add -u`, and commit again. Never use `--no-verify`. CI runs the same checks and will fail anyway.
 - **Only the pipeline deploys.** Don't deploy from a laptop.
 
