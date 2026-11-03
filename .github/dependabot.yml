@@ -1,0 +1,26 @@
+# Weekly, grouped dependency updates. Commit headers follow CONTRIBUTING.md:
+# `build(deps): bump …` for npm and `ci: bump …` for workflow actions.
+# Dependabot's bodies have long lines, so commitlint.config.js ignores its
+# commits.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns: ['*']
+    commit-message:
+      prefix: build
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci

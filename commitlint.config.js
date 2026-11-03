@@ -2,6 +2,10 @@
 // Keep these lists in sync with that file.
 export default {
   extends: ['@commitlint/config-conventional'],
+  // Dependabot (.github/dependabot.yml) writes the headers itself, e.g.
+  // `build(deps): bump vite from 8.3.5 to 8.4.0`, but its bodies carry
+  // release notes with long lines, so its signed-off commits are not linted.
+  ignores: [(message) => message.includes('Signed-off-by: dependabot[bot]')],
   rules: {
     'type-enum': [
       2,
