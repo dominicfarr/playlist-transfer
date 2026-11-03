@@ -27,6 +27,25 @@ Each run is a one-off copy and nothing is kept in sync. The app stores nothing: 
 - AWS: S3 and CloudFront at `playlist.domfarr.com`. CloudFront also proxies Spotify's embed page so the browser can read it. DNS is in Route 53, and the infrastructure is a CloudFormation stack ([ADR 0002](docs/adr/0002-route53-dns-and-cloudformation-per-subdomain.md)).
 - GitHub Actions for continuous delivery from `main`, signing in to AWS through OIDC
 
+## Development setup
+
+You need:
+
+- Node 22+
+- [uv](https://docs.astral.sh/uv/)
+- pre-commit: `uv tool install pre-commit`
+- shellcheck: `brew install shellcheck`, or `uv tool install shellcheck-py`
+
+Then:
+
+```sh
+npm ci
+npm run hooks:install
+npm run dev
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and the commit message format.
+
 ## Docs
 
 | File                               | What it covers                                                                                                        |
