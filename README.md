@@ -1,8 +1,14 @@
 # Playlist Transfer
 
+[![CI](https://github.com/dominicfarr/playlist-transfer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dominicfarr/playlist-transfer/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=coverage)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
+
 Copy a public Spotify playlist into your Apple Music library. You only need to paste the playlist's share link. You don't need a Spotify account.
 
 > **Status:** design complete, implementation not started. The Spotify side has been proven in a throwaway spike, and the Apple Music side has not been built yet.
+
+Every push to `main` is checked by CI and analysed by [SonarQube Cloud](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer) for bugs, vulnerabilities, code smells, duplication and test coverage.
 
 ## How it works
 
