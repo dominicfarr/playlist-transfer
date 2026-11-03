@@ -18,11 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # commitlint needs the pushed range
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version-file: package.json
           cache: npm
@@ -35,7 +35,7 @@ jobs:
         run: uv tool install pre-commit
 
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -68,7 +68,7 @@ jobs:
         run: npm run build
 
       - name: Keep the build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -92,15 +92,15 @@ jobs:
       STACK_NAME: playlist-transfer
       HOSTED_ZONE_ID: Z03722621B6AEUR5NOSKX # domfarr.com (ADR 0002)
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Fetch the build artifact from checks
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
 
-      - uses: aws-actions/configure-aws-credentials@v5
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
