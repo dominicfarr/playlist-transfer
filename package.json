@@ -17,6 +17,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check:live": "vitest run --config vitest.live.config.ts",
     "hooks:install": "pre-commit install --install-hooks"
   },
   "devDependencies": {

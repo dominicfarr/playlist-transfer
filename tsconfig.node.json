@@ -19,5 +19,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["vite.config.ts", "infra/**/*.ts"]
+  "include": ["vite.config.ts", "vitest.live.config.ts", "infra/**/*.ts"]
 }
