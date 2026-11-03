@@ -5,7 +5,7 @@
     readSourcePlaylist,
     transferableTracks,
     type ReadSourcePlaylistError,
-    type ReadSourcePlaylistResult,
+    type SourcePlaylistRead,
   } from './lib/transfer';
 
   const errorMessages: Record<ReadSourcePlaylistError, string> = {
@@ -19,13 +19,13 @@
 
   let shareLink = $state('');
   let reading = $state(false);
-  let result = $state<ReadSourcePlaylistResult | null>(null);
+  let sourceRead = $state<SourcePlaylistRead | null>(null);
 
   async function read(event: SubmitEvent) {
     event.preventDefault();
     reading = true;
     try {
-      result = await readSourcePlaylist(shareLink, spotifyEmbedFetch);
+      sourceRead = await readSourcePlaylist(shareLink, spotifyEmbedFetch);
     } finally {
       reading = false;
     }
@@ -52,8 +52,8 @@
         autocomplete="off"
         placeholder="https://open.spotify.com/playlist/…"
         bind:value={shareLink}
-        aria-invalid={result !== null && !result.ok}
-        aria-describedby={result !== null && !result.ok
+        aria-invalid={sourceRead !== null && !sourceRead.ok}
+        aria-describedby={sourceRead !== null && !sourceRead.ok
           ? 'share-link-error'
           : undefined}
       />
@@ -63,12 +63,12 @@
     </div>
   </form>
 
-  {#if result && !result.ok}
+  {#if sourceRead && !sourceRead.ok}
     <p id="share-link-error" class="error" role="alert">
-      {errorMessages[result.error]}
+      {errorMessages[sourceRead.error]}
     </p>
-  {:else if result && result.ok}
-    {@const sourcePlaylist = result.sourcePlaylist}
+  {:else if sourceRead && sourceRead.ok}
+    {@const sourcePlaylist = sourceRead.sourcePlaylist}
     {@const transferableCount = transferableTracks(sourcePlaylist).length}
     <section aria-labelledby="source-playlist-name">
       <h2 id="source-playlist-name">{sourcePlaylist.name}</h2>

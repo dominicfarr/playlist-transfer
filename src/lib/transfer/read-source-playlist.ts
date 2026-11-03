@@ -5,7 +5,8 @@ import type { EmbedPage, SpotifyEmbedPort } from './spotify-embed-port';
 export type ReadSourcePlaylistError =
   'not a playlist link' | 'playlist not found' | 'source unreadable';
 
-export type ReadSourcePlaylistResult =
+/** What reading a Source Playlist gives: the Source Playlist, or why not. */
+export type SourcePlaylistRead =
   | { ok: true; sourcePlaylist: SourcePlaylist }
   | { ok: false; error: ReadSourcePlaylistError };
 
@@ -13,7 +14,7 @@ export type ReadSourcePlaylistResult =
 export async function readSourcePlaylist(
   shareLink: string,
   embed: SpotifyEmbedPort,
-): Promise<ReadSourcePlaylistResult> {
+): Promise<SourcePlaylistRead> {
   const playlistId = parseShareLink(shareLink);
   if (playlistId === null) return { ok: false, error: 'not a playlist link' };
 

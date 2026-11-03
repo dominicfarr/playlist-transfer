@@ -11,6 +11,6 @@ export {
 export type { SpotifyEmbedPort, EmbedPage } from './spotify-embed-port';
 export {
   readSourcePlaylist,
-  type ReadSourcePlaylistResult,
+  type SourcePlaylistRead,
   type ReadSourcePlaylistError,
 } from './read-source-playlist';

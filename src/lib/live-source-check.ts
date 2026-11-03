@@ -16,21 +16,21 @@ export type LiveSourceCheck =
 
 /**
  * The early warning for Spotify changing its embed page (ADR 0001): reads
- * a Source Playlist through the Transfer core and says whether the result
+ * a Source Playlist through the Transfer core and says whether what it read
  * is a non-empty, correctly shaped Source Playlist.
  */
 export async function checkLiveSourcePlaylist(
   shareLink: string,
   embed: SpotifyEmbedPort,
 ): Promise<LiveSourceCheck> {
-  const result = await readSourcePlaylist(shareLink, embed);
-  if (!result.ok) {
+  const sourceRead = await readSourcePlaylist(shareLink, embed);
+  if (!sourceRead.ok) {
     return {
       passed: false,
-      message: `Could not read a Source Playlist from ${shareLink}: ${READ_ERROR_EXPLANATIONS[result.error]}`,
+      message: `Could not read a Source Playlist from ${shareLink}: ${READ_ERROR_EXPLANATIONS[sourceRead.error]}`,
     };
   }
-  const { name, owner, sourceTracks } = result.sourcePlaylist;
+  const { name, owner, sourceTracks } = sourceRead.sourcePlaylist;
   if (sourceTracks.length === 0) {
     return {
       passed: false,
