@@ -71,6 +71,7 @@ It is a one-shot **Transfer**: re-running creates another playlist, and nothing 
   - `commitlint` at the `commit-msg` stage, enforcing the [CONTRIBUTING.md](CONTRIBUTING.md) types and scopes
 
   Any failure or modified file stops the commit. CI runs `pre-commit run --all-files` first, and also lints the commit messages of each push.
+
 - **Tests**:
   - Unit tests: embed parsing (against a saved copy of the real page), query building, Match Confidence.
   - A daily scheduled job checks the live embed page still parses.
@@ -90,4 +91,5 @@ It is a one-shot **Transfer**: re-running creates another playlist, and nothing 
   - Route 53 records
 
   This is the pattern for future subdomain apps.
+
 - `.gitignore` keeps secrets (`*.p8`, `*.pem`, `.env*`) and DNS working files (`domfarr.com.txt`, `route53-*.json`) out of the public repo.

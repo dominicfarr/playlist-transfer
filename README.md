@@ -29,9 +29,9 @@ Each run is a one-off copy and nothing is kept in sync. The app stores nothing: 
 
 ## Docs
 
-| File | What it covers |
-|---|---|
-| [PLAN.md](PLAN.md) | The full design: behaviour, stack, delivery and infrastructure |
-| [GLOSSARY.md](GLOSSARY.md) | Domain terms such as Source Playlist, Match, Match Confidence and Review. Use these words in code, commits and issues |
-| [docs/adr/](docs/adr/) | Architecture decisions and why they were made |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Workflow, pre-commit hooks and the commit message format (Conventional Commits) |
+| File                               | What it covers                                                                                                        |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| [PLAN.md](PLAN.md)                 | The full design: behaviour, stack, delivery and infrastructure                                                        |
+| [GLOSSARY.md](GLOSSARY.md)         | Domain terms such as Source Playlist, Match, Match Confidence and Review. Use these words in code, commits and issues |
+| [docs/adr/](docs/adr/)             | Architecture decisions and why they were made                                                                         |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Workflow, pre-commit hooks and the commit message format (Conventional Commits)                                       |
