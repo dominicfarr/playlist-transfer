@@ -6,7 +6,7 @@
 
 Copy a public Spotify playlist into your Apple Music library. You only need to paste the playlist's share link. You don't need a Spotify account.
 
-> **Status:** design complete, implementation not started. The Spotify side has been proven in a throwaway spike, and the Apple Music side has not been built yet.
+> **Status:** in progress at [playlist.domfarr.com](https://playlist.domfarr.com). Reading a Source Playlist from a share link works. Matching, Review and saving to Apple Music are not built yet.
 
 Every push to `main` is checked by CI and analysed by [SonarQube Cloud](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer) for bugs, vulnerabilities, code smells, duplication and test coverage.
 
