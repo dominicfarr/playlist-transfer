@@ -55,4 +55,37 @@ describe('reading a Source Playlist from a Share Link', () => {
       'Cantaloop Island',
     ]);
   });
+
+  it.each([
+    'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51',
+    'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123&pt=x',
+    'https://open.spotify.com/intl-de/playlist/4KN5k0MupIBcAX41GKLk51',
+    'open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51',
+    '  https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51/  ',
+    'spotify:playlist:4KN5k0MupIBcAX41GKLk51',
+  ])('accepts the Share Link %s', async (shareLink) => {
+    const embed = embedServing('sailing-into-yesterday.html');
+
+    const result = await readSourcePlaylist(shareLink, embed);
+
+    expect(result.ok).toBe(true);
+    expect(embed.requestedIds).toEqual(['4KN5k0MupIBcAX41GKLk51']);
+  });
+
+  it.each([
+    '',
+    'hello',
+    'https://open.spotify.com/album/4KN5k0MupIBcAX41GKLk51',
+    'https://open.spotify.com/track/4KN5k0MupIBcAX41GKLk51',
+    'https://example.com/playlist/4KN5k0MupIBcAX41GKLk51',
+    'https://open.spotify.com/playlist/not-an-id',
+    'spotify:album:4KN5k0MupIBcAX41GKLk51',
+  ])('rejects %j as not a playlist link', async (shareLink) => {
+    const embed = embedServing('sailing-into-yesterday.html');
+
+    const result = await readSourcePlaylist(shareLink, embed);
+
+    expect(result).toEqual({ ok: false, error: 'not a playlist link' });
+    expect(embed.requestedIds).toEqual([]);
+  });
 });
