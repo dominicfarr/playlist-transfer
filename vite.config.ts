@@ -16,7 +16,7 @@ export default defineConfig({
   server: { proxy: spotifyEmbedProxy },
   preview: { proxy: spotifyEmbedProxy },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'infra/**/*.test.ts'],
     environment: 'node',
   },
 });

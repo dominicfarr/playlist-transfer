@@ -1,0 +1,211 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Playlist Transfer at playlist.domfarr.com: private S3 bucket behind
+  CloudFront, with /embed/playlist/* proxied to open.spotify.com
+  (ADR 0001, ADR 0002).
+
+# The deploy role only allows these exact names: stack `playlist-transfer`
+# in us-east-1, bucket `playlist.domfarr.com`, and records for
+# playlist.domfarr.com / *.playlist.domfarr.com. Keep them in step.
+
+Parameters:
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+    Description: The shared domfarr.com Route 53 hosted zone.
+  DomainName:
+    Type: String
+    Default: playlist.domfarr.com
+    AllowedValues: [playlist.domfarr.com]
+    Description: The app's hostname, also used as the bucket name.
+
+Mappings:
+  # AWS-managed CloudFront policies and the fixed CloudFront alias zone.
+  CloudFront:
+    Managed:
+      CachingOptimized: 658327ea-f89d-4fab-a63d-7e88639e58f6
+      CachingDisabled: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+      UserAgentRefererHeaders: acba4595-bd28-49b8-b9fe-13317c0390fa
+      AliasHostedZoneId: Z2FDTNDATAQYW2
+
+Resources:
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref DomainName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: app
+          Value: playlist-transfer
+
+  SiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref SiteBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontReadViaOAC
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub 'arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${Distribution}'
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt SiteBucket.Arn
+              - !Sub '${SiteBucket.Arn}/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: playlist-transfer-s3
+        Description: Playlist Transfer CloudFront access to its S3 bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+      Tags:
+        - Key: app
+          Value: playlist-transfer
+        - Key: Name
+          Value: playlist-transfer
+
+  # Viewer request on the default (S3) behaviour. App routes without a file
+  # extension get the SPA index; any other /embed/ path is a 404 so the
+  # distribution never looks like a general Spotify proxy. The code is
+  # tested by infra/viewer-request.test.ts, which reads it from this file.
+  ViewerRequestFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: playlist-transfer-viewer-request
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Playlist Transfer SPA fallback and /embed/ 404
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          if (request.uri === '/embed' || request.uri.indexOf('/embed/') === 0) {
+            return { statusCode: 404, statusDescription: 'Not Found' };
+          }
+          if (request.uri.split('/').pop().indexOf('.') === -1) {
+            request.uri = '/index.html';
+          }
+          return request;
+        }
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Comment: playlist-transfer
+        Enabled: true
+        Aliases:
+          - !Ref DomainName
+        DefaultRootObject: index.html
+        HttpVersion: http2and3
+        IPV6Enabled: true
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: !Ref Certificate
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        Origins:
+          - Id: site-bucket
+            DomainName: !GetAtt SiteBucket.RegionalDomainName
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+          - Id: spotify-embed
+            DomainName: open.spotify.com
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+              OriginSSLProtocols: [TLSv1.2]
+        DefaultCacheBehavior:
+          TargetOriginId: site-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods: [GET, HEAD]
+          CachedMethods: [GET, HEAD]
+          Compress: true
+          CachePolicyId: !FindInMap [CloudFront, Managed, CachingOptimized]
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt ViewerRequestFunction.FunctionMetadata.FunctionARN
+        CacheBehaviors:
+          # ADR 0001: the only Spotify path we proxy. No caching, and the
+          # viewer's User-Agent is forwarded, as verified in the spike.
+          - PathPattern: /embed/playlist/*
+            TargetOriginId: spotify-embed
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods: [GET, HEAD]
+            CachedMethods: [GET, HEAD]
+            Compress: true
+            CachePolicyId: !FindInMap [CloudFront, Managed, CachingDisabled]
+            OriginRequestPolicyId:
+              !FindInMap [CloudFront, Managed, UserAgentRefererHeaders]
+      Tags:
+        - Key: app
+          Value: playlist-transfer
+        - Key: Name
+          Value: playlist-transfer
+
+  AliasRecordA:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: !FindInMap [CloudFront, Managed, AliasHostedZoneId]
+        EvaluateTargetHealth: false
+
+  AliasRecordAAAA:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: AAAA
+      AliasTarget:
+        DNSName: !GetAtt Distribution.DomainName
+        HostedZoneId: !FindInMap [CloudFront, Managed, AliasHostedZoneId]
+        EvaluateTargetHealth: false
+
+Outputs:
+  BucketName:
+    Value: !Ref SiteBucket
+  DistributionId:
+    Value: !Ref Distribution
+  SiteUrl:
+    Value: !Sub 'https://${DomainName}'
