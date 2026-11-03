@@ -102,6 +102,42 @@ describe('reading a Source Playlist from a Share Link', () => {
     expect(transferableTracks(result.sourcePlaylist)).toHaveLength(15);
   });
 
+  it('keeps artist names containing commas as one artist string with plain spaces', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('with-comma-artist-names.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    const tracks = result.sourcePlaylist.sourceTracks;
+    // The saved page separates artists with a no-break space after the comma.
+    expect(tracks[1]?.artists).toBe('Tyler, The Creator, Kali Uchis');
+    expect(tracks[9]?.artists).toBe('Postmodern Jukebox, Rogelio Douglas, Jr.');
+  });
+
+  it('warns that a Source Playlist of exactly 100 Source Tracks is possibly truncated', async () => {
+    const result = await readSourcePlaylist(
+      'https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U',
+      embedServing('rock-classics-100.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.sourcePlaylist.name).toBe('Rock Classics');
+    expect(result.sourcePlaylist.owner).toBe('Spotify');
+    expect(result.sourcePlaylist.sourceTracks).toHaveLength(100);
+    expect(result.sourcePlaylist.possiblyTruncated).toBe(true);
+  });
+
+  it('does not warn about truncation for fewer than 100 Source Tracks', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('sailing-into-yesterday.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.sourcePlaylist.possiblyTruncated).toBe(false);
+  });
+
   it.each([
     'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51',
     'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123&pt=x',

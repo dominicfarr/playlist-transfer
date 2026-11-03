@@ -17,7 +17,14 @@ export interface SourcePlaylist {
   name: string;
   owner: string;
   sourceTracks: SourceTrack[];
+  /**
+   * The embed page returns at most 100 items and no total count, so exactly
+   * 100 Source Tracks may mean the Source Playlist was cut short.
+   */
+  possiblyTruncated: boolean;
 }
+
+const EMBED_PAGE_LIMIT = 100;
 
 const NEXT_DATA =
   /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/;
@@ -37,6 +44,13 @@ interface EmbedTrack {
   duration: number;
   entityType: string;
   isPlayable: boolean;
+}
+
+const NO_BREAK_SPACE = String.fromCharCode(0xa0);
+
+/** The embed page uses no-break spaces in artist strings; matching wants plain ones. */
+function plainSpaces(text: string): string {
+  return text.replaceAll(NO_BREAK_SPACE, ' ');
 }
 
 function untransferableReason(track: EmbedTrack): UntransferableReason | null {
@@ -64,9 +78,10 @@ export function parseEmbedPage(id: string, html: string): SourcePlaylist {
     sourceTracks: entity.trackList.map((track, index) => ({
       position: index + 1,
       title: track.title,
-      artists: track.subtitle,
+      artists: plainSpaces(track.subtitle),
       durationMs: track.duration,
       untransferableReason: untransferableReason(track),
     })),
+    possiblyTruncated: entity.trackList.length === EMBED_PAGE_LIMIT,
   };
 }
