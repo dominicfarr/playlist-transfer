@@ -10,7 +10,7 @@
 
   const errorMessages: Record<ReadSourcePlaylistError, string> = {
     'not a playlist link':
-      'That is not a Spotify playlist Share Link. It should look like https://open.spotify.com/playlist/…',
+      "That isn't a Spotify Share Link for a playlist. It should look like https://open.spotify.com/playlist/…",
     'playlist not found':
       'Spotify has no playlist at that Share Link. Check the link, and that the playlist is public.',
     'source unreadable':

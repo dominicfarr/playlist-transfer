@@ -5,7 +5,7 @@ import {
 } from './transfer';
 
 const READ_ERROR_EXPLANATIONS: Record<ReadSourcePlaylistError, string> = {
-  'not a playlist link': 'it is not a Spotify playlist Share Link',
+  'not a playlist link': 'it is not a Spotify Share Link for a playlist',
   'playlist not found': 'Spotify says the playlist does not exist',
   'source unreadable':
     'the embed page could not be fetched, has no readable __NEXT_DATA__, or has changed shape (see ADR 0001)',
