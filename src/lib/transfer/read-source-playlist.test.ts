@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { readSourcePlaylist, type SpotifyEmbedPort } from './index';
+import {
+  readSourcePlaylist,
+  transferableTracks,
+  type SpotifyEmbedPort,
+} from './index';
 
 const EXAMPLE_SHARE_LINK =
   'https://open.spotify.com/playlist/4KN5k0MupIBcAX41GKLk51?si=abc123';
@@ -54,6 +58,48 @@ describe('reading a Source Playlist from a Share Link', () => {
       'Many Men - Jazz Version',
       'Cantaloop Island',
     ]);
+  });
+
+  it('marks a podcast episode as an Untransferable Track that is not a song', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('with-podcast-episode.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    const episode = result.sourcePlaylist.sourceTracks[2];
+    expect(episode).toMatchObject({
+      position: 3,
+      title: 'Episode 12: Jazz on the water',
+      untransferableReason: 'not a song',
+    });
+    expect(transferableTracks(result.sourcePlaylist)).toHaveLength(14);
+    expect(transferableTracks(result.sourcePlaylist)).not.toContain(episode);
+  });
+
+  it('marks an unplayable track as an Untransferable Track that is unavailable on Spotify', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('with-unplayable-track.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(result.sourcePlaylist.sourceTracks[4]).toMatchObject({
+      position: 5,
+      title: 'Late Night Drive',
+      untransferableReason: 'unavailable on Spotify',
+    });
+    expect(transferableTracks(result.sourcePlaylist)).toHaveLength(14);
+  });
+
+  it('counts every Source Track of the example playlist as transferable', async () => {
+    const result = await readSourcePlaylist(
+      EXAMPLE_SHARE_LINK,
+      embedServing('sailing-into-yesterday.html'),
+    );
+
+    if (!result.ok) throw new Error(`expected ok, got ${result.error}`);
+    expect(transferableTracks(result.sourcePlaylist)).toHaveLength(15);
   });
 
   it.each([

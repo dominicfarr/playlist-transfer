@@ -22,10 +22,27 @@ export interface SourcePlaylist {
 const NEXT_DATA =
   /<script id="__NEXT_DATA__" type="application\/json">([\s\S]*?)<\/script>/;
 
+/** The Source Tracks that are not Untransferable Tracks. */
+export function transferableTracks(
+  sourcePlaylist: SourcePlaylist,
+): SourceTrack[] {
+  return sourcePlaylist.sourceTracks.filter(
+    (track) => track.untransferableReason === null,
+  );
+}
+
 interface EmbedTrack {
   title: string;
   subtitle: string;
   duration: number;
+  entityType: string;
+  isPlayable: boolean;
+}
+
+function untransferableReason(track: EmbedTrack): UntransferableReason | null {
+  if (track.entityType !== 'track') return 'not a song';
+  if (!track.isPlayable) return 'unavailable on Spotify';
+  return null;
 }
 
 interface EmbedEntity {
@@ -49,7 +66,7 @@ export function parseEmbedPage(id: string, html: string): SourcePlaylist {
       title: track.title,
       artists: track.subtitle,
       durationMs: track.duration,
-      untransferableReason: null,
+      untransferableReason: untransferableReason(track),
     })),
   };
 }
