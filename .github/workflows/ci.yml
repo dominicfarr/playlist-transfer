@@ -27,7 +27,7 @@ jobs:
           node-version-file: package.json
           cache: npm
 
-      - run: npm ci --ignore-scripts # no dependency install scripts run (Sonar S8544); none are needed
+      - run: npm ci --ignore-scripts # no dependency install scripts run (Sonar S8541); none are needed
 
       - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
 

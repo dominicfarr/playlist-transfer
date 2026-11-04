@@ -33,7 +33,7 @@ jobs:
           node-version-file: package.json
           cache: npm
 
-      # Lockfile install with no dependency install scripts (Sonar S8544); none are needed
+      # Lockfile install with no dependency install scripts (Sonar S8541); none are needed
       - run: npm ci --ignore-scripts
 
       - name: Test under coverage

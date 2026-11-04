@@ -32,7 +32,7 @@ jobs:
           node-version-file: package.json
           cache: npm
 
-      - run: npm ci --ignore-scripts # no dependency install scripts run (Sonar S8544); none are needed
+      - run: npm ci --ignore-scripts # no dependency install scripts run (Sonar S8541); none are needed
 
       - name: Live Source Playlist check
         env:
