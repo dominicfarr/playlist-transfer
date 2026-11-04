@@ -59,7 +59,7 @@ interface EmbedTrack {
   playabilityReason?: unknown;
 }
 
-const NO_BREAK_SPACE = String.fromCharCode(0xa0);
+const NO_BREAK_SPACE = String.fromCodePoint(0xa0);
 
 /** The embed page uses no-break spaces in artist strings; matching wants plain ones. */
 function plainSpaces(text: string): string {
