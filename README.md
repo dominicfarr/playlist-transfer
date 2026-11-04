@@ -3,6 +3,8 @@
 [![CI](https://github.com/dominicfarr/playlist-transfer/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/dominicfarr/playlist-transfer/actions/workflows/ci.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=coverage)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=dominicfarr_playlist-transfer&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=dominicfarr_playlist-transfer)
 
 Copy a public Spotify playlist into your Apple Music library. You only need to paste the playlist's share link. You don't need a Spotify account.
 
