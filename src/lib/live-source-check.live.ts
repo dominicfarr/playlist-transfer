@@ -1,4 +1,4 @@
-import { it } from 'vitest';
+import { expect, it } from 'vitest';
 import { checkLiveSourcePlaylist } from './live-source-check';
 import { createSpotifyEmbedFetch } from './spotify-embed-fetch';
 
@@ -21,6 +21,7 @@ it(`reads a Source Playlist from live Spotify (${shareLink})`, async () => {
     shareLink,
     createSpotifyEmbedFetch('https://open.spotify.com'),
   );
-  if (!check.passed) throw new Error(check.message);
+  if (!check.passed) expect.fail(check.message);
+  expect(check.summary).toMatch(/Source Tracks/);
   console.info(check.summary);
 });
