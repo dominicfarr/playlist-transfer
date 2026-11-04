@@ -194,7 +194,9 @@ export function parseEmbedPage(
     id,
     name: entity.name,
     owner: entity.subtitle,
-    sourceTracks: entity.trackList.map(sourceTrack),
+    sourceTracks: entity.trackList.map((item, index) =>
+      sourceTrack(item, index),
+    ),
     possiblyTruncated: entity.trackList.length === EMBED_PAGE_LIMIT,
   };
 }
