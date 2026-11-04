@@ -39,7 +39,7 @@ You need:
 
 - Node 22+
 - [uv](https://docs.astral.sh/uv/)
-- pre-commit: `uv tool install pre-commit`
+- pre-commit: `uv tool install pre-commit==4.7.0` (the version CI uses; bump both together)
 - shellcheck: `brew install shellcheck`, or `uv tool install shellcheck-py`
 
 Then:
