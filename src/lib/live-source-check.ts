@@ -51,7 +51,8 @@ export async function checkLiveSourcePlaylist(
       (track) =>
         track.title.trim() === '' ||
         track.artists.trim() === '' ||
-        !(track.durationMs > 0),
+        !Number.isFinite(track.durationMs) ||
+        track.durationMs <= 0,
     )
     .map((track) => track.position);
   if (badlyShaped.length > 0) {
