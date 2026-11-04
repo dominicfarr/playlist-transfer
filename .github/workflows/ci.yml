@@ -117,8 +117,9 @@ jobs:
         id: stack
         run: |
           output() {
+            local key="$1"
             aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
-              --query "Stacks[0].Outputs[?OutputKey=='$1'].OutputValue" --output text
+              --query "Stacks[0].Outputs[?OutputKey=='$key'].OutputValue" --output text
           }
           {
             echo "bucket=$(output BucketName)"
